@@ -1,0 +1,130 @@
+# -*- mode: sh; mode: sh-bash -*-
+
+## This is a template for "~/.blerc".
+##
+## To use ble.sh in bash, please set up "~/.bashrc" as follows:
+##
+## ```bash
+## # bashrc
+##
+## # Please put the following line in the beginning of .bashrc
+## # Note: Please replace $HOME/.local/share/blesh with the path to your ble.sh
+## [[ $- == *i* ]] && "$HOME/.local/share/blesh/ble.sh" --noattach
+##
+## # Your bashrc contents should come between the two lines.
+##
+## # Please put the following line in the end of .bashrc
+## [[ ${BLE_VERSION-} ]] && ble-attach
+## ```
+##
+
+##-----------------------------------------------------------------------------
+## Basic settings
+
+## Editor
+bleopt editor=vim
+
+##-----------------------------------------------------------------------------
+## Line editor settings
+
+## No bells
+bleopt abell=0
+
+##-----------------------------------------------------------------------------
+## Settings for Vim mode
+
+set -o vi
+
+function blerc/vim-load-hook {
+  ((_ble_bash>=40300)) && builtin bind 'set keyseq-timeout 1'
+
+  #----------------------------------------------------------------------------
+  # Settings for the mode indicator
+
+  bleopt prompt_vi_mode_indicator='\q{keymap:vi/mode-indicator}'
+  bleopt keymap_vi_mode_show=1
+
+  ## The following options specify the name of modes in
+  ## \q{keymap:vi/mode-indicator}.
+
+  bleopt keymap_vi_mode_name_insert=INSERT
+  bleopt keymap_vi_mode_name_replace=REPLACE
+  bleopt keymap_vi_mode_name_vreplace=VREPLACE
+  bleopt keymap_vi_mode_name_visual=VISUAL
+  bleopt keymap_vi_mode_name_select=SELECT
+  bleopt keymap_vi_mode_name_linewise=LINE
+  bleopt keymap_vi_mode_name_blockwise=BLOCK
+
+  bleopt keymap_vi_mode_string_nmap:=$'\e[1m-- NORMAL --\e[m'
+  bleopt keymap_vi_mode_update_prompt=
+
+  #----------------------------------------------------------------------------
+  # Keybindings
+  ble-decode/keymap:vi_imap/define-meta-bindings
+  ble-bind -m vi_imap -f 'C-RET' 'accept-line'
+
+  ble-bind -m vi_imap -f 'M-C-?' kill-backward-cword
+  ble-bind -m vi_imap -f 'M-DEL' kill-backward-cword
+  ble-bind -m vi_imap -f 'M-C-h' kill-backward-cword
+  ble-bind -m vi_imap -f 'M-BS'  kill-backward-cword
+
+  ble-bind -m vi_imap -f 'C-m' accept-line
+  ble-bind -m vi_imap -f 'RET' accept-line
+  ble-bind -m vi_nmap -f 'C-m' accept-line
+  ble-bind -m vi_nmap -f 'RET' accept-line
+
+  ble-bind -m vi_imap -f 'C-o' 'accept-and-next'
+  ble-bind -m vi_imap -f 'C-k' 'vi_imap/insert-digraph'
+
+  ble-bind -m vi_imap -f 'C-c' discard-line
+  ble-bind -m vi_nmap -f 'C-c' discard-line
+
+  ble-bind -m vi_nmap -f 'g g' vi-command/first-nol
+  ble-bind -m vi_omap -f 'g g' vi-command/first-nol
+  ble-bind -m vi_xmap -f 'g g' vi-command/first-nol
+  ble-bind -m vi_nmap -f 'G' vi-command/last-line
+  ble-bind -m vi_omap -f 'G' vi-command/last-line
+  ble-bind -m vi_xmap -f 'G' vi-command/last-line
+
+  ble-bind -m vi_nmap -f 'C-r' history-isearch-backward
+
+  #----------------------------------------------------------------------------
+  # Cursor shapes and other terminal settings
+
+  ## Cursor settings
+
+  ble-bind -m vi_nmap --cursor 2
+  ble-bind -m vi_imap --cursor 5
+  ble-bind -m vi_omap --cursor 4
+  ble-bind -m vi_xmap --cursor 2
+  ble-bind -m vi_smap --cursor 2
+  ble-bind -m vi_cmap --cursor 0
+
+  ## DECSCUSR setting
+  _ble_term_Ss=$'\e[@1 q'
+
+  ## Control sequences that will be output on entering each mode
+  bleopt term_vi_nmap=
+  bleopt term_vi_imap=
+  bleopt term_vi_omap=
+  bleopt term_vi_xmap=
+  bleopt term_vi_smap=
+  bleopt term_vi_cmap=
+
+  #----------------------------------------------------------------------------
+  # Miscellaneous settings
+
+  bleopt keymap_vi_imap_undo=
+  bleopt keymap_vi_keymodel=
+  bleopt keymap_vi_operatorfunc=
+  bleopt keymap_vi_search_match_current=
+
+  #----------------------------------------------------------------------------
+  # plugins
+
+  ## vim-surround
+  ble-import vim-surround
+  bleopt vim_surround_45:=$'$( \r )'
+  bleopt vim_surround_61:=$'$(( \r ))'
+}
+blehook/eval-after-load keymap_vi blerc/vim-load-hook
